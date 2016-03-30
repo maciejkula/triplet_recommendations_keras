@@ -49,8 +49,8 @@ def bpr_triplet_loss(X):
     positive_item_latent, negative_item_latent = item_latent.values()
 
     # BPR loss
-    loss = - 1.0 / (1.0 + K.exp(-(K.sum(user_latent * positive_item_latent, axis=-1, keepdims=True)
-                                - K.sum(user_latent * negative_item_latent, axis=-1, keepdims=True))))
+    loss = - K.sigmoid(K.sum(user_latent * positive_item_latent, axis=-1, keepdims=True)
+                        - K.sum(user_latent * negative_item_latent, axis=-1, keepdims=True))
 
     return loss
 
@@ -134,9 +134,6 @@ def count_inversions(model, user_features, posititve_item_features, negative_ite
     return (loss > 0).mean()
 ```
 
-    Using Theano backend.
-
-
 ## Load and transform data
 We're going to load the Movielens 100k dataset and create triplets of (user, known positive item, randomly sampled negative item).
 
@@ -189,7 +186,7 @@ print('AUC before training %s' % metrics.full_auc(model, test))
     Total params: 673024
     --------------------------------------------------------------------------------
     None
-    AUC before training 0.513835762337
+    AUC before training 0.501299628023
 
 
 ## Run the model
@@ -224,38 +221,33 @@ for epoch in range(num_epochs):
     Epoch 0
     Train on 49906 samples, validate on 5469 samples
     Epoch 1/1
-    2s - loss: -8.5987e-01 - val_loss: -8.4400e-01
-    AUC 0.839738215107
+    3s - loss: -5.5494e-01 - val_loss: -7.2574e-01
+    AUC 0.811561647389
     Inversions percentage 0.0
     Epoch 1
     Train on 49906 samples, validate on 5469 samples
     Epoch 1/1
-    2s - loss: -8.6342e-01 - val_loss: -8.4455e-01
-    AUC 0.837477853849
+    2s - loss: -7.9905e-01 - val_loss: -8.3045e-01
+    AUC 0.847673826619
     Inversions percentage 0.0
     Epoch 2
     Train on 49906 samples, validate on 5469 samples
     Epoch 1/1
-    2s - loss: -8.6641e-01 - val_loss: -8.4507e-01
-    AUC 0.834460576151
+    3s - loss: -8.3617e-01 - val_loss: -8.4223e-01
+    AUC 0.8481524906
     Inversions percentage 0.0
     Epoch 3
     Train on 49906 samples, validate on 5469 samples
     Epoch 1/1
-    2s - loss: -8.6936e-01 - val_loss: -8.4560e-01
-    AUC 0.832217327676
+    3s - loss: -8.4645e-01 - val_loss: -8.4633e-01
+    AUC 0.846546205717
     Inversions percentage 0.0
     Epoch 4
     Train on 49906 samples, validate on 5469 samples
     Epoch 1/1
-    2s - loss: -8.7201e-01 - val_loss: -8.4597e-01
-    AUC 0.82897806716
+    3s - loss: -8.5240e-01 - val_loss: -8.4820e-01
+    AUC 0.84574170195
     Inversions percentage 0.0
 
 
 The AUC is in the mid-80s. At some point we start overfitting, so it would be a good idea to stop early or add some regularization.
-
-
-```python
-
-```

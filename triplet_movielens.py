@@ -31,8 +31,8 @@ def bpr_triplet_loss(X):
     positive_item_latent, negative_item_latent = item_latent.values()
 
     # BPR loss
-    loss = - 1.0 / (1.0 + K.exp(-(K.sum(user_latent * positive_item_latent, axis=-1, keepdims=True)
-                                - K.sum(user_latent * negative_item_latent, axis=-1, keepdims=True))))
+    loss = - K.sigmoid(K.sum(user_latent * positive_item_latent, axis=-1, keepdims=True)
+                       - K.sum(user_latent * negative_item_latent, axis=-1, keepdims=True))
 
     return loss
 

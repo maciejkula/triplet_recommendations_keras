@@ -25,7 +25,7 @@ def bpr_triplet_loss(X):
     positive_item_latent, negative_item_latent, user_latent = X
 
     # BPR loss
-    loss = -K.sigmoid(
+    loss = 1.0 - K.sigmoid(
         K.sum(user_latent * positive_item_latent, axis=-1, keepdims=True) -
         K.sum(user_latent * negative_item_latent, axis=-1, keepdims=True))
 
@@ -67,7 +67,8 @@ def build_model(num_users, num_items, latent_dim):
 
 if __name__ == '__main__':
 
-    num_epochs = 5
+    latent_dim = 100
+    num_epochs = 10
 
     # Read data
     train, test = data.get_movielens_data()
@@ -76,10 +77,7 @@ if __name__ == '__main__':
     # Prepare the test triplets
     test_uid, test_pid, test_nid = data.get_triplets(test)
 
-    # Sample triplets from the training data
-    uid, pid, nid = data.get_triplets(train)
-
-    model = build_model(num_users, num_items, 10)
+    model = build_model(num_users, num_items, latent_dim)
 
     # Print the model structure
     print(model.summary())
@@ -91,6 +89,9 @@ if __name__ == '__main__':
 
         print('Epoch %s' % epoch)
 
+        # Sample triplets from the training data
+        uid, pid, nid = data.get_triplets(train)
+
         X = {
             'user_input': uid,
             'positive_item_input': pid,
@@ -99,9 +100,9 @@ if __name__ == '__main__':
 
         model.fit(X,
                   np.ones(len(uid)),
-                  batch_size=512,
+                  batch_size=64,
                   nb_epoch=1,
-                  verbose=2,
+                  verbose=0,
                   shuffle=True)
 
         print('AUC %s' % metrics.full_auc(model, test))

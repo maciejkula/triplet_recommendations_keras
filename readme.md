@@ -1,5 +1,7 @@
-
 # Recommendations in Keras using triplet loss
+
+_Note_: a much richer set of neural network recommender models is available as [Spotlight](https://github.com/maciejkula/spotlight).
+
 Along the lines of BPR [1]. 
 
 [1] Rendle, Steffen, et al. "BPR: Bayesian personalized ranking from implicit feedback." Proceedings of the Twenty-Fifth Conference on Uncertainty in Artificial Intelligence. AUAI Press, 2009.

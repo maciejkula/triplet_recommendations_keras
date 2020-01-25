@@ -8,7 +8,7 @@ import numpy as np
 
 from keras import backend as K
 from keras.models import Model
-from keras.layers import Embedding, Flatten, Input, merge
+from keras.layers import Embedding, Flatten, Input, Lambda
 from keras.optimizers import Adam
 
 import data
@@ -22,8 +22,7 @@ def identity_loss(y_true, y_pred):
 
 def bpr_triplet_loss(X):
 
-    positive_item_latent, negative_item_latent, user_latent = X
-
+    user_latent, positive_item_latent, negative_item_latent = X
     # BPR loss
     loss = 1.0 - K.sigmoid(
         K.sum(user_latent * positive_item_latent, axis=-1, keepdims=True) -
@@ -38,28 +37,27 @@ def build_model(num_users, num_items, latent_dim):
     negative_item_input = Input((1, ), name='negative_item_input')
 
     # Shared embedding layer for positive and negative items
-    item_embedding_layer = Embedding(
-        num_items, latent_dim, name='item_embedding', input_length=1)
+    item_embedding_layer = Embedding(num_items,
+                                     latent_dim,
+                                     name='item_embedding',
+                                     input_length=1)
 
     user_input = Input((1, ), name='user_input')
 
-    positive_item_embedding = Flatten()(item_embedding_layer(
-        positive_item_input))
-    negative_item_embedding = Flatten()(item_embedding_layer(
-        negative_item_input))
-    user_embedding = Flatten()(Embedding(
-        num_users, latent_dim, name='user_embedding', input_length=1)(
-            user_input))
+    positive_item_embedding = Flatten()(
+        item_embedding_layer(positive_item_input))
+    negative_item_embedding = Flatten()(
+        item_embedding_layer(negative_item_input))
+    user_embedding = Flatten()(Embedding(num_users,
+                                         latent_dim,
+                                         name='user_embedding',
+                                         input_length=1)(user_input))
 
-    loss = merge(
-        [positive_item_embedding, negative_item_embedding, user_embedding],
-        mode=bpr_triplet_loss,
-        name='loss',
-        output_shape=(1, ))
+    loss = Lambda(bpr_triplet_loss, name='loss', output_shape=(1, ))(
+        [user_embedding, positive_item_embedding, negative_item_embedding])
 
-    model = Model(
-        input=[positive_item_input, negative_item_input, user_input],
-        output=loss)
+    model = Model(input=[positive_item_input, negative_item_input, user_input],
+                  output=loss)
     model.compile(loss=identity_loss, optimizer=Adam())
 
     return model
@@ -101,7 +99,7 @@ if __name__ == '__main__':
         model.fit(X,
                   np.ones(len(uid)),
                   batch_size=64,
-                  nb_epoch=1,
+                  epochs=1,
                   verbose=0,
                   shuffle=True)
 

@@ -2,3 +2,4 @@
 *.zip
 *.pyc
 .ipynb_checkpoints/
+.idea
